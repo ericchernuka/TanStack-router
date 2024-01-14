@@ -89,10 +89,12 @@ Despite TanStack Router being able to parse search params into reliable JSON, th
 TanStack Router provides convenient APIs for validating and typing search params. This all starts with the `Route`'s `validateSearch` option:
 
 ```tsx
+type ProductSearchSort = 'newest' | 'oldest' | 'price'
+
 interface ProductSearch {
   page: number
   filter: string
-  sort: 'newest' | 'oldest' | 'price'
+  sort: ProductSearchSort
 }
 
 const allProductsRoute = new Route({
@@ -102,8 +104,8 @@ const allProductsRoute = new Route({
     // validate and parse the search params into a typed state
     return {
       page: Number(search?.page ?? 1),
-      filter: search.filter || '',
-      sort: search.sort || 'newest',
+      filter: (search.filter as string) || '',
+      sort: (search.sort as ProductSearchSort) || 'newest',
     }
   },
 })
@@ -118,10 +120,12 @@ The `validateSearch` option is a function that is provided the JSON parsed (but 
 Here's an example:
 
 ```tsx
+type ProductSearchSort = 'newest' | 'oldest' | 'price'
+
 interface ProductSearch {
   page: number
   filter: string
-  sort: 'newest' | 'oldest' | 'price'
+  sort: ProductSearchSort
 }
 
 const allProductsRoute = new Route({
@@ -131,8 +135,8 @@ const allProductsRoute = new Route({
     // validate and parse the search params into a typed state
     return {
       page: Number(search?.page ?? 1),
-      filter: search.filter || '',
-      sort: search.sort || 'newest',
+      filter: (search.filter as string) || '',
+      sort: (search.sort as ProductSearchSort) || 'newest',
     }
   },
 })
