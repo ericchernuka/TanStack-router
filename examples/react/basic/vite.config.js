@@ -15,6 +15,11 @@ export default defineConfig({
         target: 'http://example.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/shadow/, ''),
+        bypass: (req) => {
+          if (req.url.includes('client')) {
+            return req.url
+          }
+        },
       },
     },
   },

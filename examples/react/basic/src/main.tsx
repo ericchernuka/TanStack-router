@@ -144,13 +144,13 @@ const shadowRoute = createRoute({
   validateSearch: (_search: Record<string, string>): { magic?: boolean } => ({
     magic: true,
   }),
-  shadowExternalRoute: true,
+  forceReloadDocument: true,
 })
 
 const shadowNestedRoute = createRoute({
   getParentRoute: () => shadowRoute,
   path: 'nested',
-  shadowExternalRoute: true,
+  forceReloadDocument: true,
 })
 
 const shadowNestedClientSide = createRoute({

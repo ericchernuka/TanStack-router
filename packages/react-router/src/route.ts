@@ -202,7 +202,7 @@ export type FileBaseRouteOptions<
   TRouterContext = {},
   TRouteContextFn = AnyContext,
   TBeforeLoadFn = AnyContext,
-  TShadowExternalRoute = boolean,
+  TForceReloadDocument = boolean,
 > = ParamsOptions<TPath, TParams> & {
   validateSearch?: Constrain<TSearchValidator, AnyValidator, DefaultValidator>
 
@@ -232,7 +232,7 @@ export type FileBaseRouteOptions<
     ) => any
   >
 
-  shadowExternalRoute?: TShadowExternalRoute
+  forceReloadDocument?: TForceReloadDocument
 
   // This async function is called before a route is loaded.
   // If an error is thrown here, the route's loader will not be called.
