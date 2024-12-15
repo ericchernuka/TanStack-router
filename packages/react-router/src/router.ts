@@ -1578,6 +1578,10 @@ export class Router<
         decodeCharMap: this.pathParamsDecodeCharMap,
       })
 
+      const forceDocumentReload =
+        last(matchedRoutesResult?.matchedRoutes ?? [])?.options
+          .shadowExternalRoute ?? false
+
       let search = fromSearch
       if (opts._includeValidateSearch && this.options.search?.strict) {
         let validatedSearch = {}
@@ -1727,6 +1731,7 @@ export class Router<
         hash: hash ?? '',
         href: `${pathname}${searchStr}${hashStr}`,
         unmaskOnReload: dest.unmaskOnReload,
+        reloadDocument: forceDocumentReload,
       }
     }
 
@@ -1890,6 +1895,16 @@ export class Router<
       ...(rest as any),
       _includeValidateSearch: true,
     })
+
+    // TODO: We can do this here or in `commitLocation`. Decided here to avoid cluttering
+    // the 'commitLocation' since it handles communicating with history
+    if (location.reloadDocument) {
+      return this.navigateExternal({
+        href: location.href,
+        replace,
+      })
+    }
+
     return this.commitLocation({
       ...location,
       viewTransition,
@@ -1906,11 +1921,8 @@ export class Router<
         const location = this.buildLocation({ to, ...rest } as any)
         href = location.href
       }
-      if (rest.replace) {
-        window.location.replace(href)
-      } else {
-        window.location.href = href
-      }
+
+      this.navigateExternal({ href, replace: rest.replace })
       return
     }
 
@@ -1919,6 +1931,20 @@ export class Router<
       href,
       to: to as string,
     })
+  }
+
+  navigateExternal = ({
+    href,
+    ...opts
+  }: {
+    href: string
+    replace?: boolean
+  }) => {
+    if (opts.replace) {
+      window.location.replace(href)
+    } else {
+      window.location.href = href
+    }
   }
 
   latestLoadPromise: undefined | Promise<void>

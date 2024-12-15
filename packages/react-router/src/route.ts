@@ -143,12 +143,12 @@ export type ParamsOptions<in out TPath extends string, in out TParams> = {
     stringify?: StringifyParamsFn<TPath, TParams>
   }
 
-  /** 
+  /**
   @deprecated Use params.parse instead
   */
   parseParams?: ParseParamsFn<TPath, TParams>
 
-  /** 
+  /**
   @deprecated Use params.stringify instead
   */
   stringifyParams?: StringifyParamsFn<TPath, TParams>
@@ -202,6 +202,7 @@ export type FileBaseRouteOptions<
   TRouterContext = {},
   TRouteContextFn = AnyContext,
   TBeforeLoadFn = AnyContext,
+  TShadowExternalRoute = boolean,
 > = ParamsOptions<TPath, TParams> & {
   validateSearch?: Constrain<TSearchValidator, AnyValidator, DefaultValidator>
 
@@ -230,6 +231,8 @@ export type FileBaseRouteOptions<
       >,
     ) => any
   >
+
+  shadowExternalRoute?: TShadowExternalRoute
 
   // This async function is called before a route is loaded.
   // If an error is thrown here, the route's loader will not be called.
@@ -371,13 +374,13 @@ export interface UpdatableRouteOptions<
       >
     >
   }
-  /** 
+  /**
   @deprecated Use search.middlewares instead
   */
   preSearchFilters?: Array<
     SearchFilter<ResolveFullSearchSchema<TParentRoute, TSearchValidator>>
   >
-  /** 
+  /**
   @deprecated Use search.middlewares instead
   */
   postSearchFilters?: Array<
