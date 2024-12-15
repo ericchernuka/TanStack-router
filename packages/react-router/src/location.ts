@@ -10,4 +10,5 @@ export interface ParsedLocation<TSearchObj extends AnySchema = {}> {
   hash: string
   maskedLocation?: ParsedLocation<TSearchObj>
   unmaskOnReload?: boolean
+  reloadDocument?: boolean
 }

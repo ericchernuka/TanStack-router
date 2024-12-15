@@ -7,6 +7,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  redirect,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { NotFoundError, fetchPost, fetchPosts } from './posts'
@@ -46,12 +47,12 @@ function RootComponent() {
           Posts
         </Link>{' '}
         <Link
-          to="/layout-a"
+          to="/shadow-redirect"
           activeProps={{
             className: 'font-bold',
           }}
         >
-          Layout
+          Redirect to Shadow
         </Link>{' '}
         <Link
           // @ts-expect-error
@@ -62,6 +63,9 @@ function RootComponent() {
         >
           This Route Does Not Exist
         </Link>
+        <Link to="/shadow">Shadow</Link>
+        <Link to="/shadow/nested">Shadow Deep</Link>
+        <Link to="/shadow/client">Shadow Client</Link>
       </div>
       <Outlet />
       <TanStackRouterDevtools position="bottom-right" />
@@ -126,83 +130,43 @@ function PostComponent() {
   )
 }
 
-const layoutRoute = createRoute({
+const shadowRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: '_layout',
-  component: LayoutComponent,
+  path: '/shadow-redirect',
+  beforeLoad() {
+    throw redirect({ to: '/shadow', replace: true })
+  },
 })
 
-function LayoutComponent() {
-  return (
-    <div className="p-2">
-      <div className="border-b">I'm a layout</div>
-      <div>
-        <Outlet />
-      </div>
-    </div>
-  )
-}
-
-const layout2Route = createRoute({
-  getParentRoute: () => layoutRoute,
-  id: '_layout-2',
-  component: Layout2Component,
+const shadowRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/shadow',
+  validateSearch: (_search: Record<string, string>): { magic?: boolean } => ({
+    magic: true,
+  }),
+  shadowExternalRoute: true,
 })
 
-function Layout2Component() {
-  return (
-    <div>
-      <div>I'm a nested layout</div>
-      <div className="flex gap-2 border-b">
-        <Link
-          to="/layout-a"
-          activeProps={{
-            className: 'font-bold',
-          }}
-        >
-          Layout A
-        </Link>
-        <Link
-          to="/layout-b"
-          activeProps={{
-            className: 'font-bold',
-          }}
-        >
-          Layout B
-        </Link>
-      </div>
-      <div>
-        <Outlet />
-      </div>
-    </div>
-  )
-}
-
-const layoutARoute = createRoute({
-  getParentRoute: () => layout2Route,
-  path: '/layout-a',
-  component: LayoutAComponent,
+const shadowNestedRoute = createRoute({
+  getParentRoute: () => shadowRoute,
+  path: 'nested',
+  shadowExternalRoute: true,
 })
 
-function LayoutAComponent() {
-  return <div>I'm layout A!</div>
-}
-
-const layoutBRoute = createRoute({
-  getParentRoute: () => layout2Route,
-  path: '/layout-b',
-  component: LayoutBComponent,
+const shadowNestedClientSide = createRoute({
+  getParentRoute: () => shadowRoute,
+  path: 'client',
+  component: ShadowNestedComponent,
 })
 
-function LayoutBComponent() {
-  return <div>I'm layout B!</div>
+function ShadowNestedComponent() {
+  return <div>Shadow Nested Client Side</div>
 }
 
 const routeTree = rootRoute.addChildren([
   postsRoute.addChildren([postRoute, postsIndexRoute]),
-  layoutRoute.addChildren([
-    layout2Route.addChildren([layoutARoute, layoutBRoute]),
-  ]),
+  shadowRedirectRoute,
+  shadowRoute.addChildren([shadowNestedClientSide, shadowNestedRoute]),
   indexRoute,
 ])
 
