@@ -7,6 +7,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  createShadowRoute,
   redirect,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
@@ -48,14 +49,6 @@ function RootComponent() {
           Posts
         </Link>{' '}
         <Link
-          to="/shadow-redirect"
-          activeProps={{
-            className: 'font-bold',
-          }}
-        >
-          Redirect to Shadow
-        </Link>{' '}
-        <Link
           // @ts-expect-error
           to="/this-route-does-not-exist"
           activeProps={{
@@ -64,9 +57,15 @@ function RootComponent() {
         >
           This Route Does Not Exist
         </Link>
-        <Link to="/shadow">Shadow</Link>
-        <Link to="/shadow/nested">Shadow Deep</Link>
-        <Link to="/shadow/client">Shadow Client</Link>
+        <Link to="/users">Users</Link>
+        <Link
+          to="/shadow-redirect"
+          activeProps={{
+            className: 'font-bold',
+          }}
+        >
+          Redirect to Users Shadow
+        </Link>{' '}
       </div>
       <Outlet />
       <TanStackRouterDevtools position="bottom-right" />
@@ -135,39 +134,62 @@ const shadowRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/shadow-redirect',
   beforeLoad() {
-    throw redirect({ to: '/shadow', replace: true })
+    throw redirect({ to: '/users/$id', params: { id: '123' }, replace: true })
   },
 })
 
-const shadowRoute = createRoute({
+const usersRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/shadow',
-  validateSearch: (_search: Record<string, string>): { magic?: boolean } => ({
-    magic: true,
+  path: '/users',
+  beforeLoad: () => ({
+    specialUserAttribute: 'foo' as const,
   }),
-  shadowExternalRoute: true,
 })
 
-const shadowNestedRoute = createRoute({
-  getParentRoute: () => shadowRoute,
-  path: 'nested',
-  shadowExternalRoute: true,
+const usersIndexRoute = createRoute({
+  getParentRoute: () => usersRoute,
+  path: '/',
+  component: UsersComponent,
 })
 
-const shadowNestedClientSide = createRoute({
-  getParentRoute: () => shadowRoute,
-  path: 'client',
-  component: ShadowNestedComponent,
+function UsersComponent() {
+  return (
+    <div className="space-x-2">
+      <Link to="/users/$id" params={{ id: '123 ' }}>
+        Shadow User Detail
+      </Link>
+
+      <Link to="/users/$id/activities" params={{ id: '123' }}>
+        Client Side Nested Shadow User Activities
+      </Link>
+    </div>
+  )
+}
+
+const userDetailShadowRoute = createShadowRoute({
+  getParentRoute: () => usersRoute,
+  path: '$id',
 })
 
-function ShadowNestedComponent() {
-  return <div>Shadow Nested Client Side</div>
+const usersActivitiesRoute = createRoute({
+  getParentRoute: () => userDetailShadowRoute,
+  path: 'activities',
+  component: UserActivitiesComponent,
+})
+
+function UserActivitiesComponent() {
+  const { specialUserAttribute } = usersActivitiesRoute.useRouteContext()
+
+  return <div>Hello {specialUserAttribute}!</div>
 }
 
 const routeTree = rootRoute.addChildren([
   postsRoute.addChildren([postRoute, postsIndexRoute]),
   shadowRedirectRoute,
-  shadowRoute.addChildren([shadowNestedClientSide, shadowNestedRoute]),
+  usersRoute.addChildren([
+    usersIndexRoute,
+    userDetailShadowRoute.addChildren([usersActivitiesRoute]),
+  ]),
   indexRoute,
 ])
 
