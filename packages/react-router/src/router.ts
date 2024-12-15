@@ -1528,7 +1528,7 @@ export class Router<
 
       const forceDocumentReload =
         last(matchedRoutesResult?.matchedRoutes ?? [])?.options
-          .shadowExternalRoute ?? false
+          .forceReloadDocument ?? false
 
       let search = fromSearch
       if (opts._includeValidateSearch && this.options.search?.strict) {
