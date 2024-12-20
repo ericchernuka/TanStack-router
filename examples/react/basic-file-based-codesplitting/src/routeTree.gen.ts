@@ -13,11 +13,15 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as UsersImport } from './routes/users'
 import { Route as PostsImport } from './routes/posts'
+import { Route as UsersIndexImport } from './routes/users.index'
 import { Route as PostsIndexImport } from './routes/posts.index'
+import { Route as UsersIdImport } from './routes/users.$id'
 import { Route as LayoutTestLayoutBImport } from './routes/_layout-test/layout-b'
 import { Route as LayoutTestLayoutAImport } from './routes/_layout-test/layout-a'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId/route'
+import { Route as UsersIdActivitiesImport } from './routes/users.$id.activities'
 import { Route as PostsPostIdDeepImport } from './routes/posts_.$postId.deep'
 
 // Create Virtual Routes
@@ -35,6 +39,12 @@ const LayoutTestLazyRoute = LayoutTestLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/_layout-test.lazy').then((d) => d.Route))
 
+const UsersRoute = UsersImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const PostsRoute = PostsImport.update({
   id: '/posts',
   path: '/posts',
@@ -47,10 +57,22 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
+const UsersIndexRoute = UsersIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UsersRoute,
+} as any)
+
 const PostsIndexRoute = PostsIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PostsRoute,
+} as any)
+
+const UsersIdRoute = UsersIdImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => UsersRoute,
 } as any)
 
 const LayoutTestLayoutBRoute = LayoutTestLayoutBImport.update({
@@ -79,6 +101,12 @@ const LayoutTestLayoutBTestLazyRoute = LayoutTestLayoutBTestLazyImport.update({
   import('./routes/_layout-test/layout-b.test.lazy').then((d) => d.Route),
 )
 
+const UsersIdActivitiesRoute = UsersIdActivitiesImport.update({
+  id: '/activities',
+  path: '/activities',
+  getParentRoute: () => UsersIdRoute,
+} as any)
+
 const PostsPostIdDeepRoute = PostsPostIdDeepImport.update({
   id: '/posts_/$postId/deep',
   path: '/posts/$postId/deep',
@@ -103,6 +131,13 @@ declare module '@tanstack/react-router' {
       path: '/posts'
       fullPath: '/posts'
       preLoaderRoute: typeof PostsImport
+      parentRoute: typeof rootRoute
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersImport
       parentRoute: typeof rootRoute
     }
     '/_layout-test': {
@@ -133,6 +168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutTestLayoutBImport
       parentRoute: typeof LayoutTestLazyImport
     }
+    '/users/$id': {
+      id: '/users/$id'
+      path: '/$id'
+      fullPath: '/users/$id'
+      preLoaderRoute: typeof UsersIdImport
+      parentRoute: typeof UsersImport
+    }
     '/posts/': {
       id: '/posts/'
       path: '/'
@@ -140,12 +182,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexImport
       parentRoute: typeof PostsImport
     }
+    '/users/': {
+      id: '/users/'
+      path: '/'
+      fullPath: '/users/'
+      preLoaderRoute: typeof UsersIndexImport
+      parentRoute: typeof UsersImport
+    }
     '/posts_/$postId/deep': {
       id: '/posts_/$postId/deep'
       path: '/posts/$postId/deep'
       fullPath: '/posts/$postId/deep'
       preLoaderRoute: typeof PostsPostIdDeepImport
       parentRoute: typeof rootRoute
+    }
+    '/users/$id/activities': {
+      id: '/users/$id/activities'
+      path: '/activities'
+      fullPath: '/users/$id/activities'
+      preLoaderRoute: typeof UsersIdActivitiesImport
+      parentRoute: typeof UsersIdImport
     }
     '/_layout-test/layout-b/test': {
       id: '/_layout-test/layout-b/test'
@@ -170,6 +226,29 @@ const PostsRouteChildren: PostsRouteChildren = {
 }
 
 const PostsRouteWithChildren = PostsRoute._addFileChildren(PostsRouteChildren)
+
+interface UsersIdRouteChildren {
+  UsersIdActivitiesRoute: typeof UsersIdActivitiesRoute
+}
+
+const UsersIdRouteChildren: UsersIdRouteChildren = {
+  UsersIdActivitiesRoute: UsersIdActivitiesRoute,
+}
+
+const UsersIdRouteWithChildren =
+  UsersIdRoute._addFileChildren(UsersIdRouteChildren)
+
+interface UsersRouteChildren {
+  UsersIdRoute: typeof UsersIdRouteWithChildren
+  UsersIndexRoute: typeof UsersIndexRoute
+}
+
+const UsersRouteChildren: UsersRouteChildren = {
+  UsersIdRoute: UsersIdRouteWithChildren,
+  UsersIndexRoute: UsersIndexRoute,
+}
+
+const UsersRouteWithChildren = UsersRoute._addFileChildren(UsersRouteChildren)
 
 interface LayoutTestLayoutBRouteChildren {
   LayoutTestLayoutBTestLazyRoute: typeof LayoutTestLayoutBTestLazyRoute
@@ -199,12 +278,16 @@ const LayoutTestLazyRouteWithChildren = LayoutTestLazyRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/posts': typeof PostsRouteWithChildren
+  '/users': typeof UsersRouteWithChildren
   '': typeof LayoutTestLazyRouteWithChildren
   '/posts/$postId': typeof PostsPostIdRouteRoute
   '/layout-a': typeof LayoutTestLayoutARoute
   '/layout-b': typeof LayoutTestLayoutBRouteWithChildren
+  '/users/$id': typeof UsersIdRouteWithChildren
   '/posts/': typeof PostsIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/posts/$postId/deep': typeof PostsPostIdDeepRoute
+  '/users/$id/activities': typeof UsersIdActivitiesRoute
   '/layout-b/test': typeof LayoutTestLayoutBTestLazyRoute
 }
 
@@ -214,8 +297,11 @@ export interface FileRoutesByTo {
   '/posts/$postId': typeof PostsPostIdRouteRoute
   '/layout-a': typeof LayoutTestLayoutARoute
   '/layout-b': typeof LayoutTestLayoutBRouteWithChildren
+  '/users/$id': typeof UsersIdRouteWithChildren
   '/posts': typeof PostsIndexRoute
+  '/users': typeof UsersIndexRoute
   '/posts/$postId/deep': typeof PostsPostIdDeepRoute
+  '/users/$id/activities': typeof UsersIdActivitiesRoute
   '/layout-b/test': typeof LayoutTestLayoutBTestLazyRoute
 }
 
@@ -223,12 +309,16 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
   '/posts': typeof PostsRouteWithChildren
+  '/users': typeof UsersRouteWithChildren
   '/_layout-test': typeof LayoutTestLazyRouteWithChildren
   '/posts/$postId': typeof PostsPostIdRouteRoute
   '/_layout-test/layout-a': typeof LayoutTestLayoutARoute
   '/_layout-test/layout-b': typeof LayoutTestLayoutBRouteWithChildren
+  '/users/$id': typeof UsersIdRouteWithChildren
   '/posts/': typeof PostsIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/posts_/$postId/deep': typeof PostsPostIdDeepRoute
+  '/users/$id/activities': typeof UsersIdActivitiesRoute
   '/_layout-test/layout-b/test': typeof LayoutTestLayoutBTestLazyRoute
 }
 
@@ -237,12 +327,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/posts'
+    | '/users'
     | ''
     | '/posts/$postId'
     | '/layout-a'
     | '/layout-b'
+    | '/users/$id'
     | '/posts/'
+    | '/users/'
     | '/posts/$postId/deep'
+    | '/users/$id/activities'
     | '/layout-b/test'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -251,19 +345,26 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/layout-a'
     | '/layout-b'
+    | '/users/$id'
     | '/posts'
+    | '/users'
     | '/posts/$postId/deep'
+    | '/users/$id/activities'
     | '/layout-b/test'
   id:
     | '__root__'
     | '/'
     | '/posts'
+    | '/users'
     | '/_layout-test'
     | '/posts/$postId'
     | '/_layout-test/layout-a'
     | '/_layout-test/layout-b'
+    | '/users/$id'
     | '/posts/'
+    | '/users/'
     | '/posts_/$postId/deep'
+    | '/users/$id/activities'
     | '/_layout-test/layout-b/test'
   fileRoutesById: FileRoutesById
 }
@@ -271,6 +372,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   PostsRoute: typeof PostsRouteWithChildren
+  UsersRoute: typeof UsersRouteWithChildren
   LayoutTestLazyRoute: typeof LayoutTestLazyRouteWithChildren
   PostsPostIdDeepRoute: typeof PostsPostIdDeepRoute
 }
@@ -278,6 +380,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   PostsRoute: PostsRouteWithChildren,
+  UsersRoute: UsersRouteWithChildren,
   LayoutTestLazyRoute: LayoutTestLazyRouteWithChildren,
   PostsPostIdDeepRoute: PostsPostIdDeepRoute,
 }
@@ -294,6 +397,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/posts",
+        "/users",
         "/_layout-test",
         "/posts_/$postId/deep"
       ]
@@ -306,6 +410,13 @@ export const routeTree = rootRoute
       "children": [
         "/posts/$postId",
         "/posts/"
+      ]
+    },
+    "/users": {
+      "filePath": "users.tsx",
+      "children": [
+        "/users/$id",
+        "/users/"
       ]
     },
     "/_layout-test": {
@@ -330,12 +441,27 @@ export const routeTree = rootRoute
         "/_layout-test/layout-b/test"
       ]
     },
+    "/users/$id": {
+      "filePath": "users.$id.tsx",
+      "parent": "/users",
+      "children": [
+        "/users/$id/activities"
+      ]
+    },
     "/posts/": {
       "filePath": "posts.index.tsx",
       "parent": "/posts"
     },
+    "/users/": {
+      "filePath": "users.index.tsx",
+      "parent": "/users"
+    },
     "/posts_/$postId/deep": {
       "filePath": "posts_.$postId.deep.tsx"
+    },
+    "/users/$id/activities": {
+      "filePath": "users.$id.activities.tsx",
+      "parent": "/users/$id"
     },
     "/_layout-test/layout-b/test": {
       "filePath": "_layout-test/layout-b.test.lazy.tsx",

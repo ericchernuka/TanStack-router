@@ -236,6 +236,42 @@ export type FileBaseRouteOptions<
   >
 }
 
+export type BaseShadowRouteOptions<
+  TParentRoute extends AnyRoute = AnyRoute,
+  TCustomId extends string = string,
+  TPath extends string = string,
+  TSearchValidator = undefined,
+  TParams = {},
+  TRouterContext = {},
+  TRouteContextFn = AnyContext,
+> = RoutePathOptions<TCustomId, TPath> &
+  FileBaseShadowRouteOptions<
+    TParentRoute,
+    TPath,
+    TSearchValidator,
+    TParams,
+    TRouterContext,
+    TRouteContextFn
+  > & {
+    getParentRoute: () => TParentRoute
+  }
+
+export type FileBaseShadowRouteOptions<
+  TParentRoute extends AnyRoute = AnyRoute,
+  TPath extends string = string,
+  TSearchValidator = undefined,
+  TParams = {},
+  TRouterContext = {},
+  TRouteContextFn = AnyContext,
+> = ParamsOptions<TPath, TParams> & {
+  validateSearch?: Constrain<TSearchValidator, AnyValidator, DefaultValidator>
+
+  context?: Constrain<
+    TRouteContextFn,
+    (ctx: RouteContextOptions<TParentRoute, TParams, TRouterContext, {}>) => any
+  >
+}
+
 export type BaseRouteOptions<
   TParentRoute extends AnyRoute = AnyRoute,
   TId extends string = string,
@@ -1139,6 +1175,88 @@ export function createRoute<
     TLoaderFn,
     TChildren
   >(options)
+}
+
+export type ShadowRouteOptions<
+  TParentRoute extends AnyRoute = AnyRoute,
+  TId extends string = string,
+  TCustomId extends string = string,
+  TFullPath extends string = string,
+  TPath extends string = string,
+  TSearchValidator = undefined,
+  TParams = AnyPathParams,
+  TRouterContext = {},
+  TRouteContextFn = AnyContext,
+> = RoutePathOptions<TCustomId, TPath> &
+  Pick<
+    RouteOptions<
+      TParentRoute,
+      TId,
+      TCustomId,
+      TFullPath,
+      TPath,
+      TSearchValidator,
+      TParams,
+      {}, // TLoaderDeps,
+      undefined, // TLoaderFn,
+      TRouterContext,
+      TRouteContextFn,
+      AnyContext // TBeforeLoadFn
+    >,
+    | 'validateSearch'
+    | 'search'
+    | 'params'
+    | 'context'
+    | 'getParentRoute'
+    | 'caseSensitive'
+    | 'staticData'
+  >
+
+export function createShadowRoute<
+  TParentRoute extends RouteConstraints['TParentRoute'] = AnyRoute,
+  TPath extends RouteConstraints['TPath'] = '/',
+  TFullPath extends RouteConstraints['TFullPath'] = ResolveFullPath<
+    TParentRoute,
+    TPath
+  >,
+  TCustomId extends RouteConstraints['TCustomId'] = string,
+  TId extends RouteConstraints['TId'] = ResolveId<
+    TParentRoute,
+    TCustomId,
+    TPath
+  >,
+  TSearchValidator = undefined,
+  TParams = ResolveParams<TPath>,
+  TRouteContextFn = AnyContext,
+  TChildren = unknown,
+>(
+  options: ShadowRouteOptions<
+    TParentRoute,
+    TId,
+    TCustomId,
+    TFullPath,
+    TPath,
+    TSearchValidator,
+    TParams,
+    AnyContext,
+    TRouteContextFn
+  >,
+) {
+  return new Route<
+    TParentRoute,
+    TPath,
+    TFullPath,
+    TCustomId,
+    TId,
+    TSearchValidator,
+    TParams,
+    AnyContext,
+    TRouteContextFn,
+    {}, // TBeforeLoadFn,
+    {}, // TLoaderDeps,
+    undefined, // TLoaderFn,
+    TChildren
+  >({ ...options, forceReloadDocument: true })
 }
 
 export type AnyRootRoute = RootRoute<any, any, any, any, any, any, any, any>
