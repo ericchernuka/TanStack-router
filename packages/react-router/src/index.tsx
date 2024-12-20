@@ -27,6 +27,7 @@ export { CatchBoundary, ErrorComponent } from './CatchBoundary'
 export {
   FileRoute,
   createFileRoute,
+  createShadowFileRoute,
   FileRouteLoader,
   LazyRoute,
   createLazyRoute,
@@ -134,6 +135,7 @@ export {
   getRouteApi,
   Route,
   createRoute,
+  createShadowRoute,
   RootRoute,
   rootRouteWithContext,
   createRootRoute,
@@ -152,6 +154,7 @@ export type {
   StaticDataRouteOption,
   RoutePathOptionsIntersection,
   RouteOptions,
+  ShadowRouteOptions,
   FileBaseRouteOptions,
   BaseRouteOptions,
   UpdatableRouteOptions,

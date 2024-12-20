@@ -1,5 +1,5 @@
 import warning from 'tiny-warning'
-import { createRoute } from './route'
+import { createRoute, createShadowRoute } from './route'
 
 import { useMatch } from './useMatch'
 import { useLoaderDeps } from './useLoaderDeps'
@@ -16,6 +16,7 @@ import type {
   AnyPathParams,
   AnyRoute,
   FileBaseRouteOptions,
+  FileBaseShadowRouteOptions,
   ResolveParams,
   RootRoute,
   Route,
@@ -74,7 +75,7 @@ export function createFileRoute<
   }).createRoute
 }
 
-/** 
+/**
   @deprecated It's no longer recommended to use the `FileRoute` class directly.
   Instead, use `createFileRoute('/path/to/file')(options)` to create a file route.
 */
@@ -151,9 +152,62 @@ export class FileRoute<
     ;(route as any).isRoot = false
     return route as any
   }
+
+  createShadowRoute = <
+    TSearchValidator = undefined,
+    TParams = ResolveParams<TPath>,
+    TRouteContextFn = AnyContext,
+    TChildren = unknown,
+  >(
+    options?: FileBaseShadowRouteOptions<
+      TParentRoute,
+      TPath,
+      TSearchValidator,
+      TParams,
+      AnyContext,
+      TRouteContextFn
+    > &
+      Pick<
+        UpdatableRouteOptions<
+          TParentRoute,
+          TId,
+          TFullPath,
+          TParams,
+          TSearchValidator,
+          undefined,
+          {},
+          AnyContext,
+          TRouteContextFn,
+          AnyContext
+        >,
+        'search' | 'caseSensitive'
+      >,
+  ): Route<
+    TParentRoute,
+    TPath,
+    TFullPath,
+    TFilePath,
+    TId,
+    TSearchValidator,
+    TParams,
+    AnyContext,
+    TRouteContextFn,
+    AnyContext,
+    {},
+    undefined,
+    TChildren
+  > => {
+    warning(
+      this.silent,
+      'FileRoute is deprecated and will be removed in the next major version. Use the createFileRoute(path)(options) function instead.',
+    )
+    const route = createShadowRoute(options as any)
+    ;(route as any).isRoot = false
+    return route as any
+  }
 }
 
-/** 
+/**
   @deprecated It's recommended not to split loaders into separate files.
   Instead, place the loader function in the the main route file, inside the
   `createFileRoute('/path/to/file)(options)` options.
@@ -272,4 +326,25 @@ export function createLazyFileRoute<
   TRoute extends FileRoutesByPath[TFilePath]['preLoaderRoute'],
 >(id: TFilePath) {
   return (opts: LazyRouteOptions) => new LazyRoute<TRoute>({ id, ...opts })
+}
+
+export function createShadowFileRoute<
+  TFilePath extends keyof FileRoutesByPath,
+  TParentRoute extends AnyRoute = FileRoutesByPath[TFilePath]['parentRoute'],
+  TId extends RouteConstraints['TId'] = FileRoutesByPath[TFilePath]['id'],
+  TPath extends RouteConstraints['TPath'] = FileRoutesByPath[TFilePath]['path'],
+  TFullPath extends
+    RouteConstraints['TFullPath'] = FileRoutesByPath[TFilePath]['fullPath'],
+>(
+  path: TFilePath,
+): FileRoute<
+  TFilePath,
+  TParentRoute,
+  TId,
+  TPath,
+  TFullPath
+>['createShadowRoute'] {
+  return new FileRoute<TFilePath, TParentRoute, TId, TPath, TFullPath>(path, {
+    silent: true,
+  }).createShadowRoute
 }
