@@ -155,6 +155,7 @@ export type FileBaseRouteOptions<
   TRouteContextFn = AnyContext,
   TBeforeLoadFn = AnyContext,
   TRemountDepsFn = AnyContext,
+  TShadowExternalRoute = boolean,
 > = ParamsOptions<TPath, TParams> & {
   validateSearch?: Constrain<TSearchValidator, AnyValidator, DefaultValidator>
 
@@ -183,6 +184,8 @@ export type FileBaseRouteOptions<
       >,
     ) => any
   >
+
+  shadowExternalRoute?: TShadowExternalRoute
 
   // This async function is called before a route is loaded.
   // If an error is thrown here, the route's loader will not be called.
@@ -360,13 +363,13 @@ export interface UpdatableRouteOptions<
       >
     >
   }
-  /** 
+  /**
   @deprecated Use search.middlewares instead
   */
   preSearchFilters?: Array<
     SearchFilter<ResolveFullSearchSchema<TParentRoute, TSearchValidator>>
   >
-  /** 
+  /**
   @deprecated Use search.middlewares instead
   */
   postSearchFilters?: Array<
