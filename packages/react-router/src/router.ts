@@ -1847,13 +1847,8 @@ export class Router<
       _includeValidateSearch: true,
     })
 
-    // TODO: We can do this here or in `commitLocation`. Decided here to avoid cluttering
-    // the 'commitLocation' since it handles communicating with history
     if (location.reloadDocument) {
-      return this.navigateExternal({
-        href: location.href,
-        replace,
-      })
+      return this.externallyNavigate({ href: location.href, replace })
     }
 
     return this.commitLocation({
@@ -1873,8 +1868,7 @@ export class Router<
         href = location.href
       }
 
-      this.navigateExternal({ href, replace: rest.replace })
-      return
+      return this.externallyNavigate({ href, replace: rest.replace })
     }
 
     return this.buildAndCommitLocation({
@@ -1884,7 +1878,7 @@ export class Router<
     })
   }
 
-  navigateExternal = ({
+  externallyNavigate = ({
     href,
     ...opts
   }: {
