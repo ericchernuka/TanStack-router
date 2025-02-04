@@ -18,7 +18,9 @@ import { Route as DashboardImport } from './routes/dashboard'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
+import { Route as ShadowIndexImport } from './routes/shadow/index'
 import { Route as DashboardIndexImport } from './routes/dashboard.index'
+import { Route as ShadowUnshadowedImport } from './routes/shadow/unshadowed'
 import { Route as DashboardUsersImport } from './routes/dashboard.users'
 import { Route as DashboardInvoicesImport } from './routes/dashboard.invoices'
 import { Route as LayoutLayoutBImport } from './routes/_layout.layout-b'
@@ -72,10 +74,22 @@ const ExpensiveIndexLazyRoute = ExpensiveIndexLazyImport.update({
   import('./routes/expensive/index.lazy').then((d) => d.Route),
 )
 
+const ShadowIndexRoute = ShadowIndexImport.update({
+  id: '/shadow/',
+  path: '/shadow/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const DashboardIndexRoute = DashboardIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+
+const ShadowUnshadowedRoute = ShadowUnshadowedImport.update({
+  id: '/shadow/unshadowed',
+  path: '/shadow/unshadowed',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const DashboardUsersRoute = DashboardUsersImport.update({
@@ -222,12 +236,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardUsersImport
       parentRoute: typeof DashboardImport
     }
+    '/shadow/unshadowed': {
+      id: '/shadow/unshadowed'
+      path: '/shadow/unshadowed'
+      fullPath: '/shadow/unshadowed'
+      preLoaderRoute: typeof ShadowUnshadowedImport
+      parentRoute: typeof rootRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexImport
       parentRoute: typeof DashboardImport
+    }
+    '/shadow/': {
+      id: '/shadow/'
+      path: '/shadow'
+      fullPath: '/shadow'
+      preLoaderRoute: typeof ShadowIndexImport
+      parentRoute: typeof rootRoute
     }
     '/expensive/': {
       id: '/expensive/'
@@ -346,7 +374,9 @@ export interface FileRoutesByFullPath {
   '/layout-b': typeof LayoutLayoutBRoute
   '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
   '/dashboard/users': typeof DashboardUsersRouteWithChildren
+  '/shadow/unshadowed': typeof ShadowUnshadowedRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/shadow': typeof ShadowIndexRoute
   '/expensive': typeof ExpensiveIndexLazyRoute
   '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
   '/dashboard/users/user': typeof DashboardUsersUserRoute
@@ -362,7 +392,9 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthProfileRoute
   '/layout-a': typeof LayoutLayoutARoute
   '/layout-b': typeof LayoutLayoutBRoute
+  '/shadow/unshadowed': typeof ShadowUnshadowedRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/shadow': typeof ShadowIndexRoute
   '/expensive': typeof ExpensiveIndexLazyRoute
   '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
   '/dashboard/users/user': typeof DashboardUsersUserRoute
@@ -383,7 +415,9 @@ export interface FileRoutesById {
   '/_layout/layout-b': typeof LayoutLayoutBRoute
   '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
   '/dashboard/users': typeof DashboardUsersRouteWithChildren
+  '/shadow/unshadowed': typeof ShadowUnshadowedRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/shadow/': typeof ShadowIndexRoute
   '/expensive/': typeof ExpensiveIndexLazyRoute
   '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
   '/dashboard/users/user': typeof DashboardUsersUserRoute
@@ -404,7 +438,9 @@ export interface FileRouteTypes {
     | '/layout-b'
     | '/dashboard/invoices'
     | '/dashboard/users'
+    | '/shadow/unshadowed'
     | '/dashboard/'
+    | '/shadow'
     | '/expensive'
     | '/dashboard/invoices/$invoiceId'
     | '/dashboard/users/user'
@@ -419,7 +455,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/layout-a'
     | '/layout-b'
+    | '/shadow/unshadowed'
     | '/dashboard'
+    | '/shadow'
     | '/expensive'
     | '/dashboard/invoices/$invoiceId'
     | '/dashboard/users/user'
@@ -438,7 +476,9 @@ export interface FileRouteTypes {
     | '/_layout/layout-b'
     | '/dashboard/invoices'
     | '/dashboard/users'
+    | '/shadow/unshadowed'
     | '/dashboard/'
+    | '/shadow/'
     | '/expensive/'
     | '/dashboard/invoices/$invoiceId'
     | '/dashboard/users/user'
@@ -454,6 +494,8 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   thisFolderIsNotInTheUrlRouteGroupRoute: typeof thisFolderIsNotInTheUrlRouteGroupRoute
+  ShadowUnshadowedRoute: typeof ShadowUnshadowedRoute
+  ShadowIndexRoute: typeof ShadowIndexRoute
   ExpensiveIndexLazyRoute: typeof ExpensiveIndexLazyRoute
 }
 
@@ -465,6 +507,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   thisFolderIsNotInTheUrlRouteGroupRoute:
     thisFolderIsNotInTheUrlRouteGroupRoute,
+  ShadowUnshadowedRoute: ShadowUnshadowedRoute,
+  ShadowIndexRoute: ShadowIndexRoute,
   ExpensiveIndexLazyRoute: ExpensiveIndexLazyRoute,
 }
 
@@ -484,6 +528,8 @@ export const routeTree = rootRoute
         "/dashboard",
         "/login",
         "/(this-folder-is-not-in-the-url)/route-group",
+        "/shadow/unshadowed",
+        "/shadow/",
         "/expensive/"
       ]
     },
@@ -545,9 +591,15 @@ export const routeTree = rootRoute
         "/dashboard/users/"
       ]
     },
+    "/shadow/unshadowed": {
+      "filePath": "shadow/unshadowed.tsx"
+    },
     "/dashboard/": {
       "filePath": "dashboard.index.tsx",
       "parent": "/dashboard"
+    },
+    "/shadow/": {
+      "filePath": "shadow/index.tsx"
     },
     "/expensive/": {
       "filePath": "expensive/index.lazy.tsx"

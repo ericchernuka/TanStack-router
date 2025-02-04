@@ -45,19 +45,20 @@ function RootComponent() {
                 ['/profile', 'Profile'],
                 ['/login', 'Login'],
                 ['/route-group', 'Route Group'],
+                ['/shadow/unshadowed', 'Nested Unshadowed Route'],
+                ['/shadow', 'Shadow Route', true],
               ] as const
-            ).map(([to, label]) => {
+            ).map(([to, label, exact = false]) => {
               return (
                 <div key={to}>
                   <Link
                     to={to}
-                    activeOptions={
-                      {
-                        // If the route points to the root of it's parent,
-                        // make sure it's only active if it's exact
-                        // exact: to === '.',
-                      }
-                    }
+                    activeOptions={{
+                      // If the route points to the root of it's parent,
+                      // make sure it's only active if it's exact
+                      // exact: to === '.',
+                      exact,
+                    }}
                     preload="intent"
                     className={`block py-2 px-3 text-blue-700`}
                     // Make "active" links bold

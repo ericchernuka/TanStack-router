@@ -10,6 +10,7 @@ import {
   createRootRouteWithContext,
   createRoute,
   createRouter,
+  createShadowRoute,
   lazyRouteComponent,
   redirect,
   retainSearchParams,
@@ -69,19 +70,20 @@ function RootComponent() {
                 ['/layout-b', 'Layout B'],
                 ['/profile', 'Profile'],
                 ['/login', 'Login'],
+                ['/shadow/unshadowed', 'Nested Unshadowed Route'],
+                ['/shadow', 'Shadow Route', true],
               ] as const
-            ).map(([to, label]) => {
+            ).map(([to, label, exact = false]) => {
               return (
                 <div key={to}>
                   <Link
                     to={to}
-                    activeOptions={
-                      {
-                        // If the route points to the root of it's parent,
-                        // make sure it's only active if it's exact
-                        // exact: to === '.',
-                      }
-                    }
+                    activeOptions={{
+                      // If the route points to the root of it's parent,
+                      // make sure it's only active if it's exact
+                      // exact: to === '.',
+                      exact,
+                    }}
                     preload="intent"
                     className={`block py-2 px-3 text-blue-700`}
                     // Make "active" links bold
@@ -787,6 +789,23 @@ function LayoutBComponent() {
   )
 }
 
+const shadowIndexRoute = createShadowRoute({
+  getParentRoute: () => rootRoute,
+  path: 'shadow',
+})
+
+const unshadowedRoute = createRoute({
+  getParentRoute: () => shadowIndexRoute,
+  path: 'unshadowed',
+  component: UnshadowedComponent,
+})
+
+function UnshadowedComponent() {
+  return (
+    <div>Route is nested underneath an externally hosted shadow route.</div>
+  )
+}
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   dashboardRoute.addChildren([
@@ -798,6 +817,7 @@ const routeTree = rootRoute.addChildren([
   authRoute.addChildren([profileRoute]),
   loginRoute,
   layoutRoute.addChildren([layoutARoute, layoutBRoute]),
+  shadowIndexRoute.addChildren([unshadowedRoute]),
 ])
 
 const router = createRouter({
